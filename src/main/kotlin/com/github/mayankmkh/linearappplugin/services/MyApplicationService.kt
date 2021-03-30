@@ -1,6 +1,6 @@
-package org.jetbrains.plugins.template.services
+package com.github.mayankmkh.linearappplugin.services
 
-import org.jetbrains.plugins.template.MyBundle
+import com.github.mayankmkh.linearappplugin.MyBundle
 
 class MyApplicationService {
 
