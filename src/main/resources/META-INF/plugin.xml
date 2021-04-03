@@ -1,19 +1,19 @@
 <idea-plugin>
-    <id>com.github.mayankmkh.linearappplugin</id>
-    <name>linear-app-plugin</name>
-    <vendor>mayankmkh</vendor>
+    <id>dev.mayankmkh.intellij.linear</id>
+    <name>Linear Tasks</name>
+    <vendor url="https://www.mayankmkh.dev/">mayankmkh</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.mayankmkh.linearappplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.mayankmkh.linearappplugin.services.MyProjectService"/>
+        <applicationService serviceImplementation="dev.mayankmkh.intellij.linear.services.MyApplicationService"/>
+        <projectService serviceImplementation="dev.mayankmkh.intellij.linear.services.MyProjectService"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.mayankmkh.linearappplugin.listeners.MyProjectManagerListener"
+        <listener class="dev.mayankmkh.intellij.linear.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 </idea-plugin>

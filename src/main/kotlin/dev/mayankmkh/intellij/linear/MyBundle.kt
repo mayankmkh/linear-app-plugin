@@ -1,4 +1,4 @@
-package com.github.mayankmkh.linearappplugin
+package dev.mayankmkh.intellij.linear
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls

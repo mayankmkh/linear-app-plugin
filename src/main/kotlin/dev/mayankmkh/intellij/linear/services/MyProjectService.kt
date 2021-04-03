@@ -1,7 +1,7 @@
-package com.github.mayankmkh.linearappplugin.services
+package dev.mayankmkh.intellij.linear.services
 
-import com.github.mayankmkh.linearappplugin.MyBundle
 import com.intellij.openapi.project.Project
+import dev.mayankmkh.intellij.linear.MyBundle
 
 class MyProjectService(project: Project) {
 

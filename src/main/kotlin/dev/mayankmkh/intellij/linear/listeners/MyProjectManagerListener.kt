@@ -1,9 +1,9 @@
-package com.github.mayankmkh.linearappplugin.listeners
+package dev.mayankmkh.intellij.linear.listeners
 
-import com.github.mayankmkh.linearappplugin.services.MyProjectService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
+import dev.mayankmkh.intellij.linear.services.MyProjectService
 
 internal class MyProjectManagerListener : ProjectManagerListener {
 

@@ -1,6 +1,6 @@
-package com.github.mayankmkh.linearappplugin.services
+package dev.mayankmkh.intellij.linear.services
 
-import com.github.mayankmkh.linearappplugin.MyBundle
+import dev.mayankmkh.intellij.linear.MyBundle
 
 class MyApplicationService {
 
