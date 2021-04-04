@@ -1,0 +1,16 @@
+{
+  "name": "Linear GraphQL Schema",
+  "schemaPath": "schema.json",
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "https://api.linear.app/graphql",
+        "headers": {
+          "Authorization": "${env:LINEAR-ACCESS-TOKEN}",
+          "user-agent": "Apollo GraphQL"
+        },
+        "introspect": false
+      }
+    }
+  }
+}
