@@ -6,6 +6,7 @@
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.tasks</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="dev.mayankmkh.intellij.linear.services.MyApplicationService"/>
@@ -16,4 +17,8 @@
         <listener class="dev.mayankmkh.intellij.linear.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+
+    <extensions defaultExtensionNs="com.intellij.tasks">
+        <repositoryType implementation="dev.mayankmkh.intellij.linear.LinearRepositoryType"/>
+    </extensions>
 </idea-plugin>
