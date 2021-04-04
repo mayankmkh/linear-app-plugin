@@ -1,9 +1,9 @@
-query Issues($id:String!){
-    team(id: $id) {
+query Issues($teamId: String!, $count: Int!, $endCursor: String){
+    team(id: $teamId) {
         id
         name
 
-        issues {
+        issues(first: $count, after: $endCursor, orderBy: updatedAt) {
             nodes {
                 id
                 identifier
@@ -29,6 +29,21 @@ query Issues($id:String!){
                         createdAt
                     }
                 }
+            }
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+        }
+    }
+}
+
+query GetPageInfo($teamId: String!, $offset: Int!, $endCursor: String) {
+    team(id: $teamId) {
+        issues(first: $offset, after: $endCursor, orderBy: updatedAt) {
+            pageInfo {
+                hasNextPage
+                endCursor
             }
         }
     }
