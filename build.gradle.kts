@@ -18,6 +18,8 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.16.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    // apollo client - read more: https://github.com/apollographql/apollo-android
+    id("com.apollographql.apollo") version "2.5.5"
 }
 
 group = properties("pluginGroup")
@@ -30,6 +32,8 @@ repositories {
 }
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.16.0")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.5")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.5")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -63,6 +67,17 @@ detekt {
         xml.enabled = false
         txt.enabled = false
     }
+}
+
+apollo {
+    // instruct the compiler to generate Kotlin models
+    generateKotlinModels.set(true)
+
+    customTypeMapping.set(
+        mapOf(
+            "DateTime" to "java.util.Date"
+        )
+    )
 }
 
 tasks {
