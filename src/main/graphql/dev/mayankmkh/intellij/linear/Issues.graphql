@@ -1,0 +1,35 @@
+query Issues($id:String!){
+    team(id: $id) {
+        id
+        name
+
+        issues {
+            nodes {
+                id
+                identifier
+                title
+                description
+                createdAt
+                url
+                updatedAt
+                state {
+                    type
+                }
+                labels {
+                    nodes {
+                        name
+                    }
+                }
+                comments {
+                    nodes {
+                        body,
+                        user {
+                            name
+                        },
+                        createdAt
+                    }
+                }
+            }
+        }
+    }
+}
