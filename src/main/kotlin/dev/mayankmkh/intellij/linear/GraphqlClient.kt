@@ -24,21 +24,25 @@ private val dateCustomTypeAdapter = object : CustomTypeAdapter<Date> {
     }
 }
 
-private class AuthorizationInterceptor(private val apiKey: String) : Interceptor {
+private class AuthorizationInterceptor(private val apiKeyProvider: ApiKeyProvider) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
-            .addHeader("Authorization", apiKey)
+            .addHeader("Authorization", apiKeyProvider.getApiKey())
             .build()
         return chain.proceed(request)
     }
 }
 
-internal fun createApolloClient(serverUrl: String, apiKey: String) = ApolloClient.builder()
+internal fun createApolloClient(serverUrl: String, apiKeyProvider: ApiKeyProvider) = ApolloClient.builder()
     .serverUrl(serverUrl)
     .addCustomTypeAdapter(CustomType.DATETIME, dateCustomTypeAdapter)
     .okHttpClient(
         OkHttpClient.Builder()
-            .addInterceptor(AuthorizationInterceptor(apiKey))
+            .addInterceptor(AuthorizationInterceptor(apiKeyProvider))
             .build()
     )
     .build()
+
+fun interface ApiKeyProvider {
+    fun getApiKey(): String
+}
