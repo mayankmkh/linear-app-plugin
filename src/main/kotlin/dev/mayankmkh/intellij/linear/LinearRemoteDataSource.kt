@@ -71,6 +71,13 @@ class LinearRemoteDataSource(private val teamId: String, private val apolloClien
         if (pageInfo === firstPageInfo) null else pageInfo
     }
 
+    suspend fun testConnection(teamId: String) = withContext(Dispatchers.IO) {
+        val response = apolloClient.query(TestConnectionQuery(teamId)).await()
+        response.errors?.getOrNull(0)?.let {
+            throw IllegalArgumentException(it.message)
+        }
+    }
+
     companion object {
         private val LOG: Logger = Logger.getLogger(LinearRemoteDataSource::class.simpleName)
         private const val BATCH_SIZE = 50
