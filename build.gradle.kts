@@ -69,9 +69,19 @@ detekt {
     }
 }
 
+ktlint {
+    filter {
+        exclude { tree ->
+            // https://github.com/apollographql/apollo-android/issues/2079
+            tree.path == "apolloGenerated" && tree.file.path.contains("/generated/")
+        }
+    }
+}
+
 apollo {
     // instruct the compiler to generate Kotlin models
     generateKotlinModels.set(true)
+    rootPackageName.set("apolloGenerated")
 
     customTypeMapping.set(
         mapOf(

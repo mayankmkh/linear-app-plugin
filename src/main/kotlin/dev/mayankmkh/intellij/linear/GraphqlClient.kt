@@ -1,9 +1,9 @@
 package dev.mayankmkh.intellij.linear
 
+import apolloGenerated.dev.mayankmkh.intellij.linear.type.CustomType
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.CustomTypeAdapter
 import com.apollographql.apollo.api.CustomTypeValue
-import dev.mayankmkh.intellij.linear.type.CustomType
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response

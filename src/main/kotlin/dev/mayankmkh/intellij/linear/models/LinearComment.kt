@@ -1,7 +1,7 @@
 package dev.mayankmkh.intellij.linear.models
 
+import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
 import com.intellij.tasks.Comment
-import dev.mayankmkh.intellij.linear.IssuesQuery
 import java.util.Date
 
 class LinearComment(private val node: IssuesQuery.Node2) : Comment() {

@@ -1,5 +1,8 @@
 package dev.mayankmkh.intellij.linear
 
+import apolloGenerated.dev.mayankmkh.intellij.linear.GetPageInfoQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.TestConnectionQuery
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
