@@ -49,6 +49,7 @@ class LinearRepository : NewBaseRepositoryImpl {
         return object : CancellableConnection() {
             private var testJob: Job = Job()
             override fun doTest() {
+                testJob = Job()
                 runBlocking(testJob) {
                     remoteDataSource.testConnection(getTeamId())
                 }
