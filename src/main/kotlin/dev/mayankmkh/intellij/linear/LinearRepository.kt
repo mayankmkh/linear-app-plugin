@@ -25,7 +25,8 @@ class LinearRepository : NewBaseRepositoryImpl {
     override fun clone(): BaseRepository = LinearRepository(this)
 
     override fun findTask(id: String): Task? {
-        TODO("Not yet implemented")
+        // TODO("Not yet implemented")
+        return null
     }
 
     override fun getUrl(): String = URL
