@@ -33,7 +33,7 @@ repositories {
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.16.0")
     implementation("com.apollographql.apollo:apollo-runtime:2.5.5")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.5")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.7")
 }
 
 // Configure gradle-intellij-plugin plugin.
