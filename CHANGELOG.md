@@ -3,6 +3,25 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
-## [1.0.0-alpha01]
+
 ### Added
+
+- Update Task Status
+
+### Changed
+
+- Upgrade Gradle Wrapper to `7.0.2`
+- Remove reference to the `jcenter()` from Gradle configuration file
+- Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.17.1`
+- Dependencies - upgrade `detekt-formatting` to `1.17.1`
+- Dependencies - upgrade `apollo graphql` to `2.5.7`
+- Dependencies (GitHub Actions) - upgrade `actions/create-release` to `v1.1.4`
+- Dependencies (GitHub Actions) - upgrade `actions/checkout` to `v2.3.4`
+- Dependencies (GitHub Actions) - upgrade `actions/upload-release-asset` to `v1.0.2`
+- Dependencies - upgrade `org.jetbrains.kotlin.jvm` to `1.5.0`
+
+## [1.0.0-alpha01]
+
+### Added
+
 - Initial implementation of Linear.app tasks server
