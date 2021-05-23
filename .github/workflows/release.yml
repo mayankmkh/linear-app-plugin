@@ -58,19 +58,13 @@ jobs:
       - name: Patch Changelog
         run: ./gradlew patchChangelog
 
-      # Commit patched Changelog
-      - name: Commit files
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -m "Update changelog" -a
-
       # Push changes
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
           base: main
           branch: patchChangelog
+          commit-message: Update changelog
           title: Update changelog
           assignees: mayankmkh
 
