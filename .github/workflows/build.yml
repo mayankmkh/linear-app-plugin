@@ -14,7 +14,7 @@
 ## JBIJPPTPL
 
 name: Build
-on: [pull_request]
+on: [push, pull_request]
 jobs:
 
   # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
