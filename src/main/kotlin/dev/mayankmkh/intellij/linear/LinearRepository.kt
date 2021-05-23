@@ -3,6 +3,7 @@ package dev.mayankmkh.intellij.linear
 import com.intellij.tasks.Task
 import com.intellij.tasks.impl.BaseRepository
 import com.intellij.tasks.impl.httpclient.NewBaseRepositoryImpl
+import com.intellij.util.containers.map2Array
 import dev.mayankmkh.intellij.linear.models.LinearTask
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
@@ -42,7 +43,8 @@ class LinearRepository : NewBaseRepositoryImpl {
     //  getIssues is called again with empty query, 0 offset and limit of 20 which results in no change in list as
     //  its already showing those items. The offset should not be 0 here.
     override fun getIssues(query: String?, offset: Int, limit: Int, withClosed: Boolean): Array<LinearTask> {
-        return remoteDataSource.getIssues(getTeamId(), query, offset, limit, withClosed)
+        val issues = remoteDataSource.getIssues(getTeamId(), query, offset, limit, withClosed)
+        return issues.map2Array { LinearTask(it, this) }
     }
 
     override fun createCancellableConnection(): CancellableConnection {
