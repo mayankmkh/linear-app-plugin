@@ -48,3 +48,29 @@ query GetPageInfo($teamId: String!, $offset: Int!, $endCursor: String) {
         }
     }
 }
+
+query GetIssueStates($issueId: String!) {
+    issue(id: $issueId) {
+        team {
+            states {
+                nodes {
+                    id
+                    name
+                    type
+                    position
+                }
+            }
+        }
+    }
+}
+
+mutation UpdateIssueState($issueId: String!, $stateId: String!){
+    issueUpdate(
+        id: $issueId,
+        input: {
+            stateId: $stateId
+        }
+    ) {
+        success
+    }
+}

@@ -1,11 +1,15 @@
 package dev.mayankmkh.intellij.linear
 
+import apolloGenerated.dev.mayankmkh.intellij.linear.GetIssueStatesQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.GetPageInfoQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.TestConnectionQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.UpdateIssueStateMutation
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
+import com.intellij.tasks.CustomTaskState
+import com.intellij.tasks.Task
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -84,6 +88,27 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         val response = apolloClient.query(TestConnectionQuery(teamId)).await()
         response.errors?.getOrNull(0)?.let {
             throw IllegalArgumentException(it.message)
+        }
+    }
+
+    suspend fun getAvailableTaskStates(task: Task): MutableSet<CustomTaskState> = withContext(Dispatchers.IO) {
+        val response = apolloClient.query(GetIssueStatesQuery(task.id)).await()
+        response.errors?.getOrNull(0)?.let {
+            throw IllegalArgumentException(it.message)
+        }
+        response.data?.issue?.team?.states?.nodes?.map { CustomTaskState(it.id, it.name) }?.toMutableSet()
+            ?: mutableSetOf()
+    }
+
+    suspend fun setTaskState(task: Task, state: CustomTaskState): Unit = withContext(Dispatchers.IO) {
+        val response = apolloClient.mutate(UpdateIssueStateMutation(task.id, state.id)).await()
+        response.errors?.getOrNull(0)?.let {
+            throw IllegalArgumentException(it.message)
+        }
+        if (response.data?.issueUpdate?.success == true) {
+            // task updated successfully
+        } else {
+            throw IllegalStateException("State could not be updated for Task ${task.id} to ${state.presentableName}")
         }
     }
 

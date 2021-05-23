@@ -1,5 +1,6 @@
 package dev.mayankmkh.intellij.linear
 
+import com.intellij.tasks.CustomTaskState
 import com.intellij.tasks.Task
 import com.intellij.tasks.impl.BaseRepository
 import com.intellij.tasks.impl.httpclient.NewBaseRepositoryImpl
@@ -8,6 +9,7 @@ import dev.mayankmkh.intellij.linear.models.LinearTask
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 
+@Suppress("TooManyFunctions")
 class LinearRepository : NewBaseRepositoryImpl {
 
     private val apiKeyProvider = ApiKeyProvider { password }
@@ -61,6 +63,18 @@ class LinearRepository : NewBaseRepositoryImpl {
                 testJob.cancel()
             }
         }
+    }
+
+    override fun getFeatures(): Int {
+        return super.getFeatures() or STATE_UPDATING
+    }
+
+    override fun getAvailableTaskStates(task: Task): MutableSet<CustomTaskState> {
+        return runBlocking { remoteDataSource.getAvailableTaskStates(task) }
+    }
+
+    override fun setTaskState(task: Task, state: CustomTaskState) {
+        runBlocking { remoteDataSource.setTaskState(task, state) }
     }
 
     companion object {
