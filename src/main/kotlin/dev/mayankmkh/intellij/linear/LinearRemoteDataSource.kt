@@ -6,8 +6,6 @@ import apolloGenerated.dev.mayankmkh.intellij.linear.TestConnectionQuery
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
-import com.intellij.util.containers.map2Array
-import dev.mayankmkh.intellij.linear.models.LinearTask
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -15,13 +13,19 @@ import java.util.logging.Logger
 
 class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
 
-    fun getIssues(teamId: String, query: String?, offset: Int, limit: Int, withClosed: Boolean): Array<LinearTask> {
+    fun getIssues(
+        teamId: String,
+        query: String?,
+        offset: Int,
+        limit: Int,
+        withClosed: Boolean
+    ): List<IssuesQuery.Node> {
         // FIXME: 04/04/21 Ignoring query and withClosed for now
         LOG.info("query: $query, offset: $offset, limit: $limit, withClosed: $withClosed")
         return runBlocking { getIssues(teamId, offset, limit) }
     }
 
-    private suspend fun getIssues(teamId: String, offset: Int, limit: Int): Array<LinearTask> =
+    private suspend fun getIssues(teamId: String, offset: Int, limit: Int): List<IssuesQuery.Node> =
         withContext(Dispatchers.IO) {
             var pageInfo = getIssuePageInfo(teamId, offset)
             LOG.info("pageInfo: $pageInfo")
@@ -46,7 +50,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
             }
 
             LOG.info("list: " + list.joinToString { it.identifier })
-            list.map2Array { LinearTask(it) }
+            list
         }
 
     private suspend fun getIssuePageInfo(teamId: String, offset: Int): IssuesQuery.PageInfo {

@@ -3,14 +3,16 @@ package dev.mayankmkh.intellij.linear.models
 import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
 import com.intellij.tasks.Comment
 import com.intellij.tasks.Task
+import com.intellij.tasks.TaskRepository
 import com.intellij.tasks.TaskType
 import com.intellij.util.containers.map2Array
+import dev.mayankmkh.intellij.linear.LinearRepository
 import icons.LinearPluginIcons
 import java.util.Date
 import javax.swing.Icon
 
 @SuppressWarnings("TooManyFunctions")
-class LinearTask(private val node: IssuesQuery.Node) : Task() {
+class LinearTask(private val node: IssuesQuery.Node, private val repository: LinearRepository) : Task() {
 
     override fun getId(): String = node.identifier
 
@@ -46,4 +48,6 @@ class LinearTask(private val node: IssuesQuery.Node) : Task() {
     override fun isIssue(): Boolean = true
 
     override fun getIssueUrl(): String = node.url
+
+    override fun getRepository(): TaskRepository = repository
 }
