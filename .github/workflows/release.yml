@@ -65,8 +65,14 @@ jobs:
           git commit -m "Update changelog" -a
 
       # Push changes
-      - name: Push changes
-        uses: ad-m/github-push-action@master
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
         with:
-          branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: patchChangelog
+          title: Update changelog
+          assignees: mayankmkh
+
+      - name: Print Pull Request Info
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
