@@ -64,7 +64,7 @@ jobs:
           base: main
           branch: patchChangelog
           commit-message: Update changelog
-          title: Update changelog
+          title: Release ${{ github.event.release.tag_name }}
           assignees: mayankmkh
 
       - name: Print Pull Request Info
