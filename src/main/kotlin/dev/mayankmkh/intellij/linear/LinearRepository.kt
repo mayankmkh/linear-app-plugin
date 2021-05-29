@@ -5,11 +5,13 @@ import com.intellij.tasks.Task
 import com.intellij.tasks.impl.BaseRepository
 import com.intellij.tasks.impl.httpclient.NewBaseRepositoryImpl
 import com.intellij.util.containers.map2Array
+import com.intellij.util.xmlb.annotations.Tag
 import dev.mayankmkh.intellij.linear.models.LinearTask
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 
 @Suppress("TooManyFunctions")
+@Tag("Linear")
 class LinearRepository : NewBaseRepositoryImpl {
 
     private val apiKeyProvider = ApiKeyProvider { password }
