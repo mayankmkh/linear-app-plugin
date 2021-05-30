@@ -3,6 +3,20 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
+
+### Added
+
+- Persist configuration across IDE restarts
+
+### Changed
+
+- Dependencies (GitHub Actions) - upgrade `org.jetbrains.kotlin.jvm` to `1.5.10`
+- Dependencies (GitHub Actions) - upgrade `actions/cache` to `2.1.6`
+
+### Fixed
+
+- Adds missing id in `create-pull-request` Github Action
+
 ## [1.0.0-alpha02]
 
 ### Added
