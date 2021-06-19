@@ -3,6 +3,14 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
+
+### Changed
+
+- Dependencies (GitHub Actions) - upgrade `gradle/wrapper-validation-action` to `1.0.4`
+- Dependencies (GitHub Actions) - upgrade `actions/upload-artifact` to `2.2.4`
+- Dependencies - upgrade `apollo graphql` to `2.5.9`
+- Dependencies - upgrade `org.jetbrains.intellij` plugin to `1.0`
+
 ## [1.0.0-alpha03]
 
 ### Added
