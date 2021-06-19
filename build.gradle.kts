@@ -32,7 +32,7 @@ repositories {
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.1")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.7")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.9")
     implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.7")
 }
 
