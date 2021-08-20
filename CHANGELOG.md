@@ -3,6 +3,13 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
+### Added
+- Use JVM compatibility version from `gradle.properties`
+
+### Changed
+- Use Java 11
+- GitHub Actions: Use Java 11
+
 ## [1.0.0-beta01]
 
 ### Changed
