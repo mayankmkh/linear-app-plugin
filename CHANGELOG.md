@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.0.0]
+
 ### Added
 
 - Use JVM compatibility version from `gradle.properties`
