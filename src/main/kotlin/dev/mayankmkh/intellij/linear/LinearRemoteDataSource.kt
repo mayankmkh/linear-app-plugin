@@ -26,7 +26,11 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
     ): List<IssuesQuery.Node> {
         // FIXME: 04/04/21 Ignoring query and withClosed for now
         LOG.info("query: $query, offset: $offset, limit: $limit, withClosed: $withClosed")
-        return runBlocking { getIssues(teamId, offset, limit) }
+        return try {
+            runBlocking { getIssues(teamId, offset, limit) }
+        } catch (e: InterruptedException) {
+            emptyList()
+        }
     }
 
     private suspend fun getIssues(teamId: String, offset: Int, limit: Int): List<IssuesQuery.Node> =
