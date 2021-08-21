@@ -3,6 +3,7 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
+## [1.0.0]
 
 ## [1.0.0]
 
