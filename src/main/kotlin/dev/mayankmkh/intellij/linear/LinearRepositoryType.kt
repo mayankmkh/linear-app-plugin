@@ -20,7 +20,7 @@ class LinearRepositoryType : BaseRepositoryType<LinearRepository>() {
     override fun createEditor(
         repository: LinearRepository,
         project: Project,
-        changeListener: Consumer<LinearRepository>
+        changeListener: Consumer<in LinearRepository>
     ): TaskRepositoryEditor {
         return LinearRepositoryEditor(project, repository, changeListener)
     }
