@@ -3,12 +3,25 @@
 # linear-app-plugin Changelog
 
 ## [Unreleased]
+
 ### Added
+
 - Use JVM compatibility version from `gradle.properties`
+- Support for build 212.*
 
 ### Changed
+
+- Upgrade Gradle Wrapper to `7.2`
+- Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.18.0`
+- Dependencies - upgrade `org.jetbrains.changelog` to `1.2.1`
+- Dependencies - upgrade `org.jetbrains.intellij` to `1.1.4`
+- Dependencies - upgrade `org.jetbrains.kotlin.jvm` to `1.5.21`
 - Use Java 11
 - GitHub Actions: Use Java 11
+
+### Fixed
+
+- IDE showing error for old request when a new request arrives for getIssues
 
 ## [1.0.0-beta01]
 
