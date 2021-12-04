@@ -60,11 +60,13 @@ changelog {
 detekt {
     config = files("./detekt-config.yml")
     buildUponDefaultConfig = true
+}
 
+tasks.withType<Detekt>().configureEach {
     reports {
-        html.enabled = false
-        xml.enabled = false
-        txt.enabled = false
+        html.required.set(false)
+        xml.required.set(false)
+        txt.required.set(false)
     }
 }
 
