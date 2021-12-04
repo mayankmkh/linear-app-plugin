@@ -1,51 +1,92 @@
+fragment PageInfoIssueConnection on IssueConnection {
+    pageInfo {
+        hasNextPage
+        endCursor
+    }
+}
+
+fragment ShortIssueConnection on IssueConnection {
+    nodes {
+        id
+        identifier
+        title
+        description
+        createdAt
+        url
+        updatedAt
+        state {
+            type
+        }
+        labels {
+            nodes {
+                name
+            }
+        }
+        comments {
+            nodes {
+                body,
+                user {
+                    name
+                },
+                createdAt
+            }
+        }
+    }
+    ...PageInfoIssueConnection
+}
+
 query Issues($teamId: String!, $count: Int!, $endCursor: String){
     team(id: $teamId) {
         id
         name
 
         issues(first: $count, after: $endCursor, orderBy: updatedAt) {
-            nodes {
-                id
-                identifier
-                title
-                description
-                createdAt
-                url
-                updatedAt
-                state {
-                    type
+            ...ShortIssueConnection
+        }
+    }
+}
+
+query SearchIssues($query:String!, $teamId: String!, $count: Int!, $endCursor: String){
+    issueSearch(
+        first: $count,
+        after: $endCursor,
+        orderBy: updatedAt,
+        query: $query,
+        filter: {
+            team: {
+                key: {
+                    eq: $teamId
                 }
-                labels {
-                    nodes {
-                        name
-                    }
-                }
-                comments {
-                    nodes {
-                        body,
-                        user {
-                            name
-                        },
-                        createdAt
-                    }
-                }
-            }
-            pageInfo {
-                hasNextPage
-                endCursor
             }
         }
+    ) {
+        ...ShortIssueConnection
     }
 }
 
 query GetPageInfo($teamId: String!, $offset: Int!, $endCursor: String) {
     team(id: $teamId) {
         issues(first: $offset, after: $endCursor, orderBy: updatedAt) {
-            pageInfo {
-                hasNextPage
-                endCursor
+            ...PageInfoIssueConnection
+        }
+    }
+}
+
+query GetSearchIssuesPageInfo($query:String!, $teamId: String!, $offset: Int!, $endCursor: String) {
+    issueSearch(
+        first: $offset,
+        after: $endCursor,
+        orderBy: updatedAt,
+        query: $query,
+        filter: {
+            team: {
+                key: {
+                    eq: $teamId
+                }
             }
         }
+    ) {
+        ...PageInfoIssueConnection
     }
 }
 

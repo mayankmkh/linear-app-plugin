@@ -1,6 +1,6 @@
 package dev.mayankmkh.intellij.linear.models
 
-import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.ShortIssueConnection
 import com.intellij.tasks.Comment
 import com.intellij.tasks.Task
 import com.intellij.tasks.TaskRepository
@@ -12,7 +12,7 @@ import java.util.Date
 import javax.swing.Icon
 
 @SuppressWarnings("TooManyFunctions")
-class LinearTask(private val node: IssuesQuery.Node, private val repository: LinearRepository) : Task() {
+class LinearTask(private val node: ShortIssueConnection.Node, private val repository: LinearRepository) : Task() {
 
     override fun getId(): String = node.identifier
 

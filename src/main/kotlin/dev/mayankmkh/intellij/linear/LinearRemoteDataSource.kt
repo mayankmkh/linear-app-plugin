@@ -2,11 +2,17 @@ package dev.mayankmkh.intellij.linear
 
 import apolloGenerated.dev.mayankmkh.intellij.linear.GetIssueStatesQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.GetPageInfoQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.GetSearchIssuesPageInfoQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
+import apolloGenerated.dev.mayankmkh.intellij.linear.SearchIssuesQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.TestConnectionQuery
 import apolloGenerated.dev.mayankmkh.intellij.linear.UpdateIssueStateMutation
+import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.PageInfoIssueConnection
+import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.ShortIssueConnection
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Input
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.api.Query
 import com.apollographql.apollo.coroutines.await
 import com.intellij.tasks.CustomTaskState
 import com.intellij.tasks.Task
@@ -23,70 +29,127 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         offset: Int,
         limit: Int,
         withClosed: Boolean
-    ): List<IssuesQuery.Node> {
-        // FIXME: 04/04/21 Ignoring query and withClosed for now
+    ): List<ShortIssueConnection.Node> {
+        // FIXME: 04/04/21 Ignoring withClosed for now
         LOG.info("query: $query, offset: $offset, limit: $limit, withClosed: $withClosed")
         return try {
-            runBlocking { getIssues(teamId, offset, limit) }
+            runBlocking { getIssues(teamId, query, offset, limit) }
         } catch (e: InterruptedException) {
             emptyList()
         }
     }
 
-    private suspend fun getIssues(teamId: String, offset: Int, limit: Int): List<IssuesQuery.Node> =
-        withContext(Dispatchers.IO) {
-            var pageInfo = getIssuePageInfo(teamId, offset)
-            LOG.info("pageInfo: $pageInfo")
-
-            var remainingIssues = limit
-            val list: MutableList<IssuesQuery.Node> = ArrayList(limit)
-
-            while (remainingIssues > 0 && pageInfo.hasNextPage) {
-                LOG.info("remainingIssues: $remainingIssues")
-                val numberOfItems = remainingIssues.coerceAtMost(BATCH_SIZE)
-                val response =
-                    apolloClient.query(IssuesQuery(teamId, numberOfItems, Input.optional(pageInfo.endCursor))).await()
-
-                val data = response.data ?: break
-                val issues = data.team.issues
-                val nodes = issues.nodes
-
-                list.addAll(nodes)
-                pageInfo = issues.pageInfo
-                remainingIssues -= nodes.size
-                LOG.info("pageInfo: $pageInfo")
-            }
-
-            LOG.info("list: " + list.joinToString { it.identifier })
-            list
-        }
-
-    private suspend fun getIssuePageInfo(teamId: String, offset: Int): IssuesQuery.PageInfo {
-        val getPageInfo = getPageInfo(teamId, offset)
-        return if (getPageInfo != null) {
-            IssuesQuery.PageInfo(hasNextPage = getPageInfo.hasNextPage, endCursor = getPageInfo.endCursor)
+    private suspend fun getIssues(
+        teamId: String,
+        query: String?,
+        offset: Int,
+        limit: Int
+    ): List<ShortIssueConnection.Node> {
+        return if (query.isNullOrBlank()) {
+            val pageInfo = getIssuesPageInfo(teamId, offset)
+            getIssuesInternal(
+                limit,
+                pageInfo,
+                createQuery = { numberOfItems, endCursor -> IssuesQuery(teamId, numberOfItems, endCursor) },
+                getShortIssueConnection = { it.team.issues.fragments.shortIssueConnection }
+            )
         } else {
-            IssuesQuery.PageInfo(hasNextPage = true, endCursor = null)
+            val pageInfo = getSearchIssuesPageInfo(teamId, query, offset)
+            getIssuesInternal(
+                limit,
+                pageInfo,
+                createQuery = { numberOfItems, endCursor ->
+                    SearchIssuesQuery(
+                        query,
+                        teamId,
+                        numberOfItems,
+                        endCursor
+                    )
+                },
+                getShortIssueConnection = { it.issueSearch.fragments.shortIssueConnection }
+            )
         }
     }
 
-    private suspend fun getPageInfo(teamId: String, offset: Int): GetPageInfoQuery.PageInfo? =
-        withContext(Dispatchers.IO) {
-            var pendingOffset = offset
-            val firstPageInfo = GetPageInfoQuery.PageInfo(hasNextPage = true, endCursor = null)
-            var pageInfo = firstPageInfo
+    private suspend fun <D : Operation.Data> getIssuesInternal(
+        limit: Int,
+        initialIssuePageInfo: PageInfoIssueConnection.PageInfo?,
+        createQuery: (offset: Int, endCursor: Input<String>) -> Query<D, D, Operation.Variables>,
+        getShortIssueConnection: (data: D) -> ShortIssueConnection
+    ) = withContext(Dispatchers.IO) {
+        var pageInfo = initialIssuePageInfo ?: PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
+        LOG.info("pageInfo: $pageInfo")
 
-            while (pendingOffset > 0 && pageInfo.hasNextPage) {
-                val pageOffset = pendingOffset.coerceAtMost(MAX_COUNT)
-                val getPageInfoQuery = GetPageInfoQuery(teamId, pageOffset, Input.optional(pageInfo.endCursor))
-                val response = apolloClient.query(getPageInfoQuery).await()
-                val data = response.data ?: break
-                pageInfo = data.team.issues.pageInfo
-                pendingOffset -= pageOffset
-            }
+        var remainingIssues = limit
+        val list: MutableList<ShortIssueConnection.Node> = ArrayList(limit)
 
-            if (pageInfo === firstPageInfo) null else pageInfo
+        while (remainingIssues > 0 && pageInfo.hasNextPage) {
+            LOG.info("remainingIssues: $remainingIssues")
+            val numberOfItems = remainingIssues.coerceAtMost(BATCH_SIZE)
+            val issuesQuery = createQuery(numberOfItems, Input.optional(pageInfo.endCursor))
+            val response = apolloClient.query(issuesQuery).await()
+
+            val data = response.data ?: break
+            val shortIssueConnection = getShortIssueConnection(data)
+            val nodes = shortIssueConnection.nodes
+
+            list.addAll(nodes)
+            pageInfo = shortIssueConnection.fragments.pageInfoIssueConnection.pageInfo
+            remainingIssues -= nodes.size
+            LOG.info("pageInfo: $pageInfo")
         }
+
+        LOG.info("list: " + list.joinToString { it.identifier })
+        list
+    }
+
+    private suspend fun getIssuesPageInfo(teamId: String, offset: Int): PageInfoIssueConnection.PageInfo? {
+        return getPageInfoInternal(
+            offset,
+            createQuery = { pageOffset, endCursor -> GetPageInfoQuery(teamId, pageOffset, endCursor) },
+            getPageInfoIssueConnection = { it.team.issues.fragments.pageInfoIssueConnection }
+        )
+    }
+
+    private suspend fun getSearchIssuesPageInfo(
+        teamId: String,
+        query: String,
+        offset: Int
+    ): PageInfoIssueConnection.PageInfo? {
+        return getPageInfoInternal(
+            offset,
+            createQuery = { pageOffset, endCursor ->
+                GetSearchIssuesPageInfoQuery(
+                    query,
+                    teamId,
+                    pageOffset,
+                    endCursor
+                )
+            },
+            getPageInfoIssueConnection = { it.issueSearch.fragments.pageInfoIssueConnection }
+        )
+    }
+
+    private suspend fun <D : Operation.Data> getPageInfoInternal(
+        startOffset: Int,
+        createQuery: (offset: Int, endCursor: Input<String>) -> Query<D, D, Operation.Variables>,
+        getPageInfoIssueConnection: (data: D) -> PageInfoIssueConnection
+    ): PageInfoIssueConnection.PageInfo? = withContext(Dispatchers.IO) {
+        var pendingOffset = startOffset
+        val firstPageInfo = PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
+        var pageInfo = firstPageInfo
+
+        while (pendingOffset > 0 && pageInfo.hasNextPage) {
+            val pageOffset = pendingOffset.coerceAtMost(MAX_COUNT)
+            val getPageInfoQuery = createQuery(pageOffset, Input.optional(pageInfo.endCursor))
+            val response = apolloClient.query(getPageInfoQuery).await()
+            val data = response.data ?: break
+            pageInfo = getPageInfoIssueConnection(data).pageInfo
+            pendingOffset -= pageOffset
+        }
+
+        if (pageInfo === firstPageInfo) null else pageInfo
+    }
 
     suspend fun testConnection(teamId: String) = withContext(Dispatchers.IO) {
         val response = apolloClient.query(TestConnectionQuery(teamId)).await()
