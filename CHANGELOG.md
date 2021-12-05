@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- Issue search with query
+- Support for all future IDE versions
+
+### Changed
+
+- Upgrade `platformVersion` to `2021.3`
+- Dependencies - upgrade `org.jetbrains.kotlin.jvm` to `1.5.32`
+- Dependencies - upgrade `apollo graphql` to `2.5.11`
+- Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.19.0`
+- Dependencies - upgrade `detekt-formatting` to `1.19.0`
+- Dependencies - upgrade `org.jetbrains.intellij` to `1.3.0`
+- Dependencies (GitHub Actions) - upgrade `actions/cache` to `2.1.7`
+- Dependencies - upgrade `org.jetbrains.changelog` to `1.3.1`
+- Dependencies (GitHub Actions) - upgrade `actions/checkout` to `v2.4.0`
+- Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `10.2.0`
+
 ## [1.0.0]
 
 ### Added
