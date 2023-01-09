@@ -172,10 +172,8 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         response.errors?.getOrNull(0)?.let {
             throw IllegalArgumentException(it.message)
         }
-        if (response.data?.issueUpdate?.success == true) {
-            // task updated successfully
-        } else {
-            throw IllegalStateException("State could not be updated for Task ${task.id} to ${state.presentableName}")
+        check(response.data?.issueUpdate?.success == true) {
+            "State could not be updated for Task ${task.id} to ${state.presentableName}"
         }
     }
 
