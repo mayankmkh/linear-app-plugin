@@ -60,7 +60,7 @@ jobs:
       # Push changes
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
           base: main
           branch: patchChangelog
