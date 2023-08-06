@@ -18,7 +18,7 @@ plugins {
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "11.0.0"
     // apollo client - read more: https://github.com/apollographql/apollo-android
-    id("com.apollographql.apollo") version "2.5.14"
+    id("com.apollographql.apollo3") version "3.8.1"
 }
 
 group = properties("pluginGroup")
@@ -31,8 +31,7 @@ repositories {
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0")
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.14")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.14")
+    implementation("com.apollographql.apollo3:apollo-runtime:3.8.1")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -72,18 +71,15 @@ tasks.withType<Detekt>().configureEach {
 
 ktlint {
     filter {
-        exclude { tree ->
+        exclude { element ->
             // https://github.com/apollographql/apollo-android/issues/2079
-            tree.path == "apolloGenerated" && tree.file.path.contains("/generated/")
+            element.file.path.contains("generated/")
         }
     }
 }
 
 apollo {
-    // instruct the compiler to generate Kotlin models
-    generateKotlinModels.set(true)
-    rootPackageName.set("apolloGenerated")
-
+    packageName.set("dev.mayankmkh.intellij.linear.apolloGenerated")
     customTypeMapping.set(
         mapOf(
             "DateTime" to "java.util.Date"

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Dependencies - upgrade `apollo graphql` to `3.8.1`
+
 ## [1.1.0]
 
 ### Added

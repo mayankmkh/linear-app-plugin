@@ -1,9 +1,12 @@
 package dev.mayankmkh.intellij.linear
 
-import apolloGenerated.dev.mayankmkh.intellij.linear.type.CustomType
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.CustomTypeAdapter
-import com.apollographql.apollo.api.CustomTypeValue
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.Adapter
+import com.apollographql.apollo3.api.CustomScalarAdapters
+import com.apollographql.apollo3.api.json.JsonReader
+import com.apollographql.apollo3.api.json.JsonWriter
+import com.apollographql.apollo3.network.okHttpClient
+import dev.mayankmkh.intellij.linear.apolloGenerated.type.DateTime
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -11,16 +14,16 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
-private val dateCustomTypeAdapter = object : CustomTypeAdapter<Date> {
-    override fun decode(value: CustomTypeValue<*>): Date {
-        val temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(value.value.toString())
+private val dateCustomTypeAdapter = object : Adapter<Date> {
+    override fun fromJson(reader: JsonReader, customScalarAdapters: CustomScalarAdapters): Date {
+        val temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(reader.nextString())
         val instant = Instant.from(temporalAccessor)
         return Date.from(instant)
     }
 
-    override fun encode(value: Date): CustomTypeValue<*> {
+    override fun toJson(writer: JsonWriter, customScalarAdapters: CustomScalarAdapters, value: Date) {
         val dateString = DateTimeFormatter.ISO_INSTANT.format(value.toInstant())
-        return CustomTypeValue.GraphQLString(dateString)
+        writer.value(dateString)
     }
 }
 
@@ -33,9 +36,9 @@ private class AuthorizationInterceptor(private val apiKeyProvider: ApiKeyProvide
     }
 }
 
-internal fun createApolloClient(serverUrl: String, apiKeyProvider: ApiKeyProvider) = ApolloClient.builder()
+internal fun createApolloClient(serverUrl: String, apiKeyProvider: ApiKeyProvider) = ApolloClient.Builder()
     .serverUrl(serverUrl)
-    .addCustomTypeAdapter(CustomType.DATETIME, dateCustomTypeAdapter)
+    .addCustomScalarAdapter(DateTime.type, dateCustomTypeAdapter)
     .okHttpClient(
         OkHttpClient.Builder()
             .addInterceptor(AuthorizationInterceptor(apiKeyProvider))

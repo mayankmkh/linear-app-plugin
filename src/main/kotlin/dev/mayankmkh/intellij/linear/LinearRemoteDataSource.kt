@@ -1,21 +1,19 @@
 package dev.mayankmkh.intellij.linear
 
-import apolloGenerated.dev.mayankmkh.intellij.linear.GetIssueStatesQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.GetPageInfoQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.GetSearchIssuesPageInfoQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.IssuesQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.SearchIssuesQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.TestConnectionQuery
-import apolloGenerated.dev.mayankmkh.intellij.linear.UpdateIssueStateMutation
-import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.PageInfoIssueConnection
-import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.ShortIssueConnection
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.api.Input
-import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.api.Query
-import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo3.api.Query
 import com.intellij.tasks.CustomTaskState
 import com.intellij.tasks.Task
+import dev.mayankmkh.intellij.linear.apolloGenerated.GetIssueStatesQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.GetPageInfoQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.GetSearchIssuesPageInfoQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.IssuesQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.SearchIssuesQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.TestConnectionQuery
+import dev.mayankmkh.intellij.linear.apolloGenerated.UpdateIssueStateMutation
+import dev.mayankmkh.intellij.linear.apolloGenerated.fragment.PageInfoIssueConnection
+import dev.mayankmkh.intellij.linear.apolloGenerated.fragment.ShortIssueConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -51,7 +49,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                 limit,
                 pageInfo,
                 createQuery = { numberOfItems, endCursor -> IssuesQuery(teamId, numberOfItems, endCursor) },
-                getShortIssueConnection = { it.team.issues.fragments.shortIssueConnection }
+                getShortIssueConnection = { it.team.issues.shortIssueConnection }
             )
         } else {
             val pageInfo = getSearchIssuesPageInfo(teamId, query, offset)
@@ -66,15 +64,15 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                         endCursor
                     )
                 },
-                getShortIssueConnection = { it.issueSearch.fragments.shortIssueConnection }
+                getShortIssueConnection = { it.issueSearch.shortIssueConnection }
             )
         }
     }
 
-    private suspend fun <D : Operation.Data> getIssuesInternal(
+    private suspend fun <D : Query.Data> getIssuesInternal(
         limit: Int,
         initialIssuePageInfo: PageInfoIssueConnection.PageInfo?,
-        createQuery: (offset: Int, endCursor: Input<String>) -> Query<D, D, Operation.Variables>,
+        createQuery: (offset: Int, endCursor: Optional<String>) -> Query<D>,
         getShortIssueConnection: (data: D) -> ShortIssueConnection
     ) = withContext(Dispatchers.IO) {
         var pageInfo = initialIssuePageInfo ?: PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
@@ -86,15 +84,15 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         while (remainingIssues > 0 && pageInfo.hasNextPage) {
             LOG.info("remainingIssues: $remainingIssues")
             val numberOfItems = remainingIssues.coerceAtMost(BATCH_SIZE)
-            val issuesQuery = createQuery(numberOfItems, Input.optional(pageInfo.endCursor))
-            val response = apolloClient.query(issuesQuery).await()
+            val issuesQuery = createQuery(numberOfItems, Optional.presentIfNotNull(pageInfo.endCursor))
+            val response = apolloClient.query(issuesQuery).execute()
 
             val data = response.data ?: break
             val shortIssueConnection = getShortIssueConnection(data)
             val nodes = shortIssueConnection.nodes
 
             list.addAll(nodes)
-            pageInfo = shortIssueConnection.fragments.pageInfoIssueConnection.pageInfo
+            pageInfo = shortIssueConnection.pageInfoIssueConnection.pageInfo
             remainingIssues -= nodes.size
             LOG.info("pageInfo: $pageInfo")
         }
@@ -107,7 +105,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         return getPageInfoInternal(
             offset,
             createQuery = { pageOffset, endCursor -> GetPageInfoQuery(teamId, pageOffset, endCursor) },
-            getPageInfoIssueConnection = { it.team.issues.fragments.pageInfoIssueConnection }
+            getPageInfoIssueConnection = { it.team.issues.pageInfoIssueConnection }
         )
     }
 
@@ -126,13 +124,13 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                     endCursor
                 )
             },
-            getPageInfoIssueConnection = { it.issueSearch.fragments.pageInfoIssueConnection }
+            getPageInfoIssueConnection = { it.issueSearch.pageInfoIssueConnection }
         )
     }
 
-    private suspend fun <D : Operation.Data> getPageInfoInternal(
+    private suspend fun <D : Query.Data> getPageInfoInternal(
         startOffset: Int,
-        createQuery: (offset: Int, endCursor: Input<String>) -> Query<D, D, Operation.Variables>,
+        createQuery: (offset: Int, endCursor: Optional<String>) -> Query<D>,
         getPageInfoIssueConnection: (data: D) -> PageInfoIssueConnection
     ): PageInfoIssueConnection.PageInfo? = withContext(Dispatchers.IO) {
         var pendingOffset = startOffset
@@ -141,8 +139,8 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
 
         while (pendingOffset > 0 && pageInfo.hasNextPage) {
             val pageOffset = pendingOffset.coerceAtMost(MAX_COUNT)
-            val getPageInfoQuery = createQuery(pageOffset, Input.optional(pageInfo.endCursor))
-            val response = apolloClient.query(getPageInfoQuery).await()
+            val getPageInfoQuery = createQuery(pageOffset, Optional.presentIfNotNull(pageInfo.endCursor))
+            val response = apolloClient.query(getPageInfoQuery).execute()
             val data = response.data ?: break
             pageInfo = getPageInfoIssueConnection(data).pageInfo
             pendingOffset -= pageOffset
@@ -152,14 +150,14 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
     }
 
     suspend fun testConnection(teamId: String) = withContext(Dispatchers.IO) {
-        val response = apolloClient.query(TestConnectionQuery(teamId)).await()
+        val response = apolloClient.query(TestConnectionQuery(teamId)).execute()
         response.errors?.getOrNull(0)?.let {
             throw IllegalArgumentException(it.message)
         }
     }
 
     suspend fun getAvailableTaskStates(task: Task): MutableSet<CustomTaskState> = withContext(Dispatchers.IO) {
-        val response = apolloClient.query(GetIssueStatesQuery(task.id)).await()
+        val response = apolloClient.query(GetIssueStatesQuery(task.id)).execute()
         response.errors?.getOrNull(0)?.let {
             throw IllegalArgumentException(it.message)
         }
@@ -168,7 +166,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
     }
 
     suspend fun setTaskState(task: Task, state: CustomTaskState): Unit = withContext(Dispatchers.IO) {
-        val response = apolloClient.mutate(UpdateIssueStateMutation(task.id, state.id)).await()
+        val response = apolloClient.mutation(UpdateIssueStateMutation(task.id, state.id)).execute()
         response.errors?.getOrNull(0)?.let {
             throw IllegalArgumentException(it.message)
         }
