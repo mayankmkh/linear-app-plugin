@@ -6,6 +6,7 @@
 
 ### Changed
 
+- Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `11.5.0`
 - Dependencies - upgrade `apollo graphql` to `3.8.1`
 
 ## [1.1.0]
