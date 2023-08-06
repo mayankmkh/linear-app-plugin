@@ -6,6 +6,7 @@
 
 ### Changed
 
+- Upgrade Gradle Wrapper to `7.6.2`
 - Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.23.1`
 - Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `11.5.0`
 - Dependencies - upgrade `apollo graphql` to `3.8.1`
