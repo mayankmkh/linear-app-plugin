@@ -1,12 +1,12 @@
 package dev.mayankmkh.intellij.linear.models
 
-import apolloGenerated.dev.mayankmkh.intellij.linear.fragment.ShortIssueConnection
 import com.intellij.tasks.Comment
 import com.intellij.tasks.Task
 import com.intellij.tasks.TaskRepository
 import com.intellij.tasks.TaskType
 import com.intellij.util.containers.map2Array
 import dev.mayankmkh.intellij.linear.LinearRepository
+import dev.mayankmkh.intellij.linear.apolloGenerated.fragment.ShortIssueConnection
 import icons.LinearPluginIcons
 import java.util.Date
 import javax.swing.Icon
