@@ -8,6 +8,7 @@
 
 - GitHub Actions: Use Java 17
 - Upgrade Gradle Wrapper to `7.6.2`
+- Dependencies (GitHub Actions) - upgrade `gradle/wrapper-validation-action` to `1.1.0`
 - Dependencies - upgrade `org.jetbrains.changelog` to `2.1.2`
 - Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.23.1`
 - Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `11.5.0`
