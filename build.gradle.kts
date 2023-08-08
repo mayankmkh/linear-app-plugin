@@ -18,7 +18,7 @@ plugins {
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     // apollo client - read more: https://github.com/apollographql/apollo-android
-    id("com.apollographql.apollo3") version "3.8.1"
+    id("com.apollographql.apollo3") version "3.8.2"
 }
 
 group = properties("pluginGroup")
