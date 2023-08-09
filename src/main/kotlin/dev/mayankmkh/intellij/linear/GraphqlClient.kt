@@ -3,13 +3,13 @@ package dev.mayankmkh.intellij.linear
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Adapter
 import com.apollographql.apollo3.api.CustomScalarAdapters
+import com.apollographql.apollo3.api.http.HttpRequest
+import com.apollographql.apollo3.api.http.HttpResponse
 import com.apollographql.apollo3.api.json.JsonReader
 import com.apollographql.apollo3.api.json.JsonWriter
-import com.apollographql.apollo3.network.okHttpClient
+import com.apollographql.apollo3.network.http.HttpInterceptor
+import com.apollographql.apollo3.network.http.HttpInterceptorChain
 import dev.mayankmkh.intellij.linear.apolloGenerated.type.DateTime
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Response
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -27,23 +27,19 @@ private val dateCustomTypeAdapter = object : Adapter<Date> {
     }
 }
 
-private class AuthorizationInterceptor(private val apiKeyProvider: ApiKeyProvider) : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request().newBuilder()
+private class AuthorizationInterceptor(private val apiKeyProvider: ApiKeyProvider) : HttpInterceptor {
+    override suspend fun intercept(request: HttpRequest, chain: HttpInterceptorChain): HttpResponse {
+        val authorizedRequest = request.newBuilder()
             .addHeader("Authorization", apiKeyProvider.getApiKey())
             .build()
-        return chain.proceed(request)
+        return chain.proceed(authorizedRequest)
     }
 }
 
 internal fun createApolloClient(serverUrl: String, apiKeyProvider: ApiKeyProvider) = ApolloClient.Builder()
     .serverUrl(serverUrl)
     .addCustomScalarAdapter(DateTime.type, dateCustomTypeAdapter)
-    .okHttpClient(
-        OkHttpClient.Builder()
-            .addInterceptor(AuthorizationInterceptor(apiKeyProvider))
-            .build()
-    )
+    .addHttpInterceptor(AuthorizationInterceptor(apiKeyProvider))
     .build()
 
 fun interface ApiKeyProvider {
