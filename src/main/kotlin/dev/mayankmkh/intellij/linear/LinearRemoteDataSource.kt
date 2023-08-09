@@ -15,6 +15,7 @@ import dev.mayankmkh.intellij.linear.apolloGenerated.UpdateIssueStateMutation
 import dev.mayankmkh.intellij.linear.apolloGenerated.fragment.PageInfoIssueConnection
 import dev.mayankmkh.intellij.linear.apolloGenerated.fragment.ShortIssueConnection
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.logging.Logger
@@ -31,7 +32,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         // FIXME: 04/04/21 Ignoring withClosed for now
         LOG.info("query: $query, offset: $offset, limit: $limit, withClosed: $withClosed")
         return try {
-            runBlocking { getIssues(teamId, query, offset, limit) }
+            runBlocking(Job()) { getIssues(teamId, query, offset, limit) }
         } catch (e: InterruptedException) {
             emptyList()
         }
