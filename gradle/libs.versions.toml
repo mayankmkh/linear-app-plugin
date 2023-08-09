@@ -1,0 +1,19 @@
+[versions]
+kotlin = "1.9.0"
+changelog = "2.1.2" # https://github.com/JetBrains/gradle-changelog-plugin
+gradleIntelliJPlugin = "1.15.0" # https://github.com/JetBrains/gradle-intellij-plugin
+detekt = "1.23.1" # https://detekt.github.io/detekt/gradle.html
+ktlint = "11.5.1" # https://github.com/JLLeitschuh/ktlint-gradle
+apollo3 = "3.8.2" # https://github.com/apollographql/apollo-kotlin
+
+[libraries]
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+apollo-runtime = { group = "com.apollographql.apollo3", name = "apollo-runtime", version.ref = "apollo3" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
+gradleIntelliJPlugin = { id = "org.jetbrains.intellij", version.ref = "gradleIntelliJPlugin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+apollo3 = { id = "com.apollographql.apollo3", version.ref = "apollo3" }
