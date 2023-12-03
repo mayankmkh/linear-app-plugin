@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 @Suppress("TooManyFunctions")
 @Tag("Linear")
 class LinearRepository : NewBaseRepositoryImpl {
-
     private val apiKeyProvider = ApiKeyProvider { password }
     private val remoteDataSource = LinearRemoteDataSource(createApolloClient(URL, apiKeyProvider))
 
@@ -46,7 +45,12 @@ class LinearRepository : NewBaseRepositoryImpl {
     //  dialog is opened it already shows previously fetched issues. Now when we click 3 dots to load more issues
     //  getIssues is called again with empty query, 0 offset and limit of 20 which results in no change in list as
     //  its already showing those items. The offset should not be 0 here.
-    override fun getIssues(query: String?, offset: Int, limit: Int, withClosed: Boolean): Array<LinearTask> {
+    override fun getIssues(
+        query: String?,
+        offset: Int,
+        limit: Int,
+        withClosed: Boolean,
+    ): Array<LinearTask> {
         val issues = remoteDataSource.getIssues(getTeamId(), query, offset, limit, withClosed)
         return issues.map2Array { LinearTask(it, this) }
     }
@@ -54,6 +58,7 @@ class LinearRepository : NewBaseRepositoryImpl {
     override fun createCancellableConnection(): CancellableConnection {
         return object : CancellableConnection() {
             private var testJob: Job = Job()
+
             override fun doTest() {
                 testJob = Job()
                 runBlocking(testJob) {
@@ -75,7 +80,10 @@ class LinearRepository : NewBaseRepositoryImpl {
         return runBlocking { remoteDataSource.getAvailableTaskStates(task) }
     }
 
-    override fun setTaskState(task: Task, state: CustomTaskState) {
+    override fun setTaskState(
+        task: Task,
+        state: CustomTaskState,
+    ) {
         runBlocking { remoteDataSource.setTaskState(task, state) }
     }
 

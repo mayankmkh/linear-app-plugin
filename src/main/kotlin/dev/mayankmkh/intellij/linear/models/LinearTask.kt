@@ -13,7 +13,6 @@ import javax.swing.Icon
 
 @SuppressWarnings("TooManyFunctions")
 class LinearTask(private val node: ShortIssueConnection.Node, private val repository: LinearRepository) : Task() {
-
     override fun getId(): String = node.identifier
 
     override fun getSummary(): String = node.title
@@ -28,12 +27,13 @@ class LinearTask(private val node: ShortIssueConnection.Node, private val reposi
 
     override fun getType(): TaskType {
         node.labels.nodes.forEach {
-            val taskType = when (it.name) {
-                "Feature" -> TaskType.FEATURE
-                "Bug" -> TaskType.BUG
-                "Improvement" -> TaskType.FEATURE
-                else -> null
-            }
+            val taskType =
+                when (it.name) {
+                    "Feature" -> TaskType.FEATURE
+                    "Bug" -> TaskType.BUG
+                    "Improvement" -> TaskType.FEATURE
+                    else -> null
+                }
             if (taskType != null) return taskType
         }
         return TaskType.OTHER

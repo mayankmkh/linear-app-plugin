@@ -14,29 +14,44 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
-private val dateCustomTypeAdapter = object : Adapter<Date> {
-    override fun fromJson(reader: JsonReader, customScalarAdapters: CustomScalarAdapters): Date {
-        val temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(reader.nextString())
-        val instant = Instant.from(temporalAccessor)
-        return Date.from(instant)
-    }
+private val dateCustomTypeAdapter =
+    object : Adapter<Date> {
+        override fun fromJson(
+            reader: JsonReader,
+            customScalarAdapters: CustomScalarAdapters,
+        ): Date {
+            val temporalAccessor = DateTimeFormatter.ISO_INSTANT.parse(reader.nextString())
+            val instant = Instant.from(temporalAccessor)
+            return Date.from(instant)
+        }
 
-    override fun toJson(writer: JsonWriter, customScalarAdapters: CustomScalarAdapters, value: Date) {
-        val dateString = DateTimeFormatter.ISO_INSTANT.format(value.toInstant())
-        writer.value(dateString)
+        override fun toJson(
+            writer: JsonWriter,
+            customScalarAdapters: CustomScalarAdapters,
+            value: Date,
+        ) {
+            val dateString = DateTimeFormatter.ISO_INSTANT.format(value.toInstant())
+            writer.value(dateString)
+        }
     }
-}
 
 private class AuthorizationInterceptor(private val apiKeyProvider: ApiKeyProvider) : HttpInterceptor {
-    override suspend fun intercept(request: HttpRequest, chain: HttpInterceptorChain): HttpResponse {
-        val authorizedRequest = request.newBuilder()
-            .addHeader("Authorization", apiKeyProvider.getApiKey())
-            .build()
+    override suspend fun intercept(
+        request: HttpRequest,
+        chain: HttpInterceptorChain,
+    ): HttpResponse {
+        val authorizedRequest =
+            request.newBuilder()
+                .addHeader("Authorization", apiKeyProvider.getApiKey())
+                .build()
         return chain.proceed(authorizedRequest)
     }
 }
 
-internal fun createApolloClient(serverUrl: String, apiKeyProvider: ApiKeyProvider) = ApolloClient.Builder()
+internal fun createApolloClient(
+    serverUrl: String,
+    apiKeyProvider: ApiKeyProvider,
+) = ApolloClient.Builder()
     .serverUrl(serverUrl)
     .addCustomScalarAdapter(DateTime.type, dateCustomTypeAdapter)
     .addHttpInterceptor(AuthorizationInterceptor(apiKeyProvider))
