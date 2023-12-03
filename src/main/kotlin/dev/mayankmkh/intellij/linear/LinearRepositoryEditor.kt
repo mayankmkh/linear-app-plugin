@@ -7,9 +7,8 @@ import com.intellij.util.Consumer
 class LinearRepositoryEditor(
     project: Project,
     linearRepository: LinearRepository,
-    changeListener: Consumer<in LinearRepository>
+    changeListener: Consumer<in LinearRepository>,
 ) : BaseRepositoryEditor<LinearRepository>(project, linearRepository, changeListener) {
-
     init {
         myPasswordLabel.text = "API key:"
         myUsernameLabel.text = "Team ID:"
@@ -20,11 +19,12 @@ class LinearRepositoryEditor(
 
         updateTestButton()
 
-        val testUpdateListener = SimpleDocumentListener { e ->
-            myRepository.password = String(myPasswordText.password)
-            myRepository.username = myUserNameText.text
-            updateTestButton()
-        }
+        val testUpdateListener =
+            SimpleDocumentListener { e ->
+                myRepository.password = String(myPasswordText.password)
+                myRepository.username = myUserNameText.text
+                updateTestButton()
+            }
         myUserNameText.document.addDocumentListener(testUpdateListener)
         myPasswordText.document.addDocumentListener(testUpdateListener)
     }

@@ -21,13 +21,12 @@ import kotlinx.coroutines.withContext
 import java.util.logging.Logger
 
 class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
-
     fun getIssues(
         teamId: String,
         query: String?,
         offset: Int,
         limit: Int,
-        withClosed: Boolean
+        withClosed: Boolean,
     ): List<ShortIssueConnection.Node> {
         // FIXME: 04/04/21 Ignoring withClosed for now
         LOG.info("query: $query, offset: $offset, limit: $limit, withClosed: $withClosed")
@@ -42,7 +41,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         teamId: String,
         query: String?,
         offset: Int,
-        limit: Int
+        limit: Int,
     ): List<ShortIssueConnection.Node> {
         return if (query.isNullOrBlank()) {
             val pageInfo = getIssuesPageInfo(teamId, offset)
@@ -50,7 +49,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                 limit,
                 pageInfo,
                 createQuery = { numberOfItems, endCursor -> IssuesQuery(teamId, numberOfItems, endCursor) },
-                getShortIssueConnection = { it.team.issues.shortIssueConnection }
+                getShortIssueConnection = { it.team.issues.shortIssueConnection },
             )
         } else {
             val pageInfo = getSearchIssuesPageInfo(teamId, query, offset)
@@ -62,10 +61,10 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                         query,
                         teamId,
                         numberOfItems,
-                        endCursor
+                        endCursor,
                     )
                 },
-                getShortIssueConnection = { it.issueSearch.shortIssueConnection }
+                getShortIssueConnection = { it.issueSearch.shortIssueConnection },
             )
         }
     }
@@ -74,7 +73,7 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         limit: Int,
         initialIssuePageInfo: PageInfoIssueConnection.PageInfo?,
         createQuery: (offset: Int, endCursor: Optional<String>) -> Query<D>,
-        getShortIssueConnection: (data: D) -> ShortIssueConnection
+        getShortIssueConnection: (data: D) -> ShortIssueConnection,
     ) = withContext(Dispatchers.IO) {
         var pageInfo = initialIssuePageInfo ?: PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
         LOG.info("pageInfo: $pageInfo")
@@ -102,18 +101,21 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         list
     }
 
-    private suspend fun getIssuesPageInfo(teamId: String, offset: Int): PageInfoIssueConnection.PageInfo? {
+    private suspend fun getIssuesPageInfo(
+        teamId: String,
+        offset: Int,
+    ): PageInfoIssueConnection.PageInfo? {
         return getPageInfoInternal(
             offset,
             createQuery = { pageOffset, endCursor -> GetPageInfoQuery(teamId, pageOffset, endCursor) },
-            getPageInfoIssueConnection = { it.team.issues.pageInfoIssueConnection }
+            getPageInfoIssueConnection = { it.team.issues.pageInfoIssueConnection },
         )
     }
 
     private suspend fun getSearchIssuesPageInfo(
         teamId: String,
         query: String,
-        offset: Int
+        offset: Int,
     ): PageInfoIssueConnection.PageInfo? {
         return getPageInfoInternal(
             offset,
@@ -122,59 +124,66 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
                     query,
                     teamId,
                     pageOffset,
-                    endCursor
+                    endCursor,
                 )
             },
-            getPageInfoIssueConnection = { it.issueSearch.pageInfoIssueConnection }
+            getPageInfoIssueConnection = { it.issueSearch.pageInfoIssueConnection },
         )
     }
 
     private suspend fun <D : Query.Data> getPageInfoInternal(
         startOffset: Int,
         createQuery: (offset: Int, endCursor: Optional<String>) -> Query<D>,
-        getPageInfoIssueConnection: (data: D) -> PageInfoIssueConnection
-    ): PageInfoIssueConnection.PageInfo? = withContext(Dispatchers.IO) {
-        var pendingOffset = startOffset
-        val firstPageInfo = PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
-        var pageInfo = firstPageInfo
+        getPageInfoIssueConnection: (data: D) -> PageInfoIssueConnection,
+    ): PageInfoIssueConnection.PageInfo? =
+        withContext(Dispatchers.IO) {
+            var pendingOffset = startOffset
+            val firstPageInfo = PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
+            var pageInfo = firstPageInfo
 
-        while (pendingOffset > 0 && pageInfo.hasNextPage) {
-            val pageOffset = pendingOffset.coerceAtMost(MAX_COUNT)
-            val getPageInfoQuery = createQuery(pageOffset, Optional.presentIfNotNull(pageInfo.endCursor))
-            val response = apolloClient.query(getPageInfoQuery).execute()
-            val data = response.data ?: break
-            pageInfo = getPageInfoIssueConnection(data).pageInfo
-            pendingOffset -= pageOffset
+            while (pendingOffset > 0 && pageInfo.hasNextPage) {
+                val pageOffset = pendingOffset.coerceAtMost(MAX_COUNT)
+                val getPageInfoQuery = createQuery(pageOffset, Optional.presentIfNotNull(pageInfo.endCursor))
+                val response = apolloClient.query(getPageInfoQuery).execute()
+                val data = response.data ?: break
+                pageInfo = getPageInfoIssueConnection(data).pageInfo
+                pendingOffset -= pageOffset
+            }
+
+            if (pageInfo === firstPageInfo) null else pageInfo
         }
 
-        if (pageInfo === firstPageInfo) null else pageInfo
-    }
+    suspend fun testConnection(teamId: String) =
+        withContext(Dispatchers.IO) {
+            val response = apolloClient.query(TestConnectionQuery(teamId)).execute()
+            response.errors?.getOrNull(0)?.let {
+                throw IllegalArgumentException(it.message)
+            }
+        }
 
-    suspend fun testConnection(teamId: String) = withContext(Dispatchers.IO) {
-        val response = apolloClient.query(TestConnectionQuery(teamId)).execute()
-        response.errors?.getOrNull(0)?.let {
-            throw IllegalArgumentException(it.message)
+    suspend fun getAvailableTaskStates(task: Task): MutableSet<CustomTaskState> =
+        withContext(Dispatchers.IO) {
+            val response = apolloClient.query(GetIssueStatesQuery(task.id)).execute()
+            response.errors?.getOrNull(0)?.let {
+                throw IllegalArgumentException(it.message)
+            }
+            response.data?.issue?.team?.states?.nodes?.map { CustomTaskState(it.id, it.name) }?.toMutableSet()
+                ?: mutableSetOf()
         }
-    }
 
-    suspend fun getAvailableTaskStates(task: Task): MutableSet<CustomTaskState> = withContext(Dispatchers.IO) {
-        val response = apolloClient.query(GetIssueStatesQuery(task.id)).execute()
-        response.errors?.getOrNull(0)?.let {
-            throw IllegalArgumentException(it.message)
+    suspend fun setTaskState(
+        task: Task,
+        state: CustomTaskState,
+    ): Unit =
+        withContext(Dispatchers.IO) {
+            val response = apolloClient.mutation(UpdateIssueStateMutation(task.id, state.id)).execute()
+            response.errors?.getOrNull(0)?.let {
+                throw IllegalArgumentException(it.message)
+            }
+            check(response.data?.issueUpdate?.success == true) {
+                "State could not be updated for Task ${task.id} to ${state.presentableName}"
+            }
         }
-        response.data?.issue?.team?.states?.nodes?.map { CustomTaskState(it.id, it.name) }?.toMutableSet()
-            ?: mutableSetOf()
-    }
-
-    suspend fun setTaskState(task: Task, state: CustomTaskState): Unit = withContext(Dispatchers.IO) {
-        val response = apolloClient.mutation(UpdateIssueStateMutation(task.id, state.id)).execute()
-        response.errors?.getOrNull(0)?.let {
-            throw IllegalArgumentException(it.message)
-        }
-        check(response.data?.issueUpdate?.success == true) {
-            "State could not be updated for Task ${task.id} to ${state.presentableName}"
-        }
-    }
 
     companion object {
         private val LOG: Logger = Logger.getLogger(LinearRemoteDataSource::class.simpleName)
