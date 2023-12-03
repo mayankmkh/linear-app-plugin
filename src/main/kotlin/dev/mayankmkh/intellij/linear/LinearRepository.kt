@@ -1,5 +1,7 @@
 package dev.mayankmkh.intellij.linear
 
+import com.intellij.credentialStore.CredentialAttributes
+import com.intellij.credentialStore.generateServiceName
 import com.intellij.tasks.CustomTaskState
 import com.intellij.tasks.Task
 import com.intellij.tasks.impl.BaseRepository
@@ -13,8 +15,10 @@ import kotlinx.coroutines.runBlocking
 @Suppress("TooManyFunctions")
 @Tag("Linear")
 class LinearRepository : NewBaseRepositoryImpl {
+    var workspaceId: String = ""
+
     private val apiKeyProvider = ApiKeyProvider { password }
-    private val remoteDataSource = LinearRemoteDataSource(createApolloClient(URL, apiKeyProvider))
+    private val remoteDataSource = LinearRemoteDataSource(createApolloClient(API_URL, apiKeyProvider))
 
     /**
      * Serialization constructor
@@ -22,9 +26,13 @@ class LinearRepository : NewBaseRepositoryImpl {
     @Suppress("unused")
     constructor() : super()
 
-    constructor(type: LinearRepositoryType) : super(type)
+    constructor(type: LinearRepositoryType) : super(type) {
+        url = "https://linear.app/"
+    }
 
-    constructor(other: LinearRepository) : super(other)
+    constructor(other: LinearRepository) : super(other) {
+        workspaceId = other.workspaceId
+    }
 
     override fun clone(): BaseRepository = LinearRepository(this)
 
@@ -33,11 +41,14 @@ class LinearRepository : NewBaseRepositoryImpl {
         return null
     }
 
-    override fun getUrl(): String = URL
+    override fun getPresentableName(): String {
+//        return "Linear team: ${getTeamId()}"
+        val name = super.getPresentableName()
+        return name + "/" + workspaceId.ifEmpty { "{workspaceId}" } + "/team/${getTeamId()}"
+    }
 
-    override fun getPresentableName(): String = "Linear team: ${getTeamId()}"
-
-    override fun isConfigured(): Boolean = super.isConfigured() && password.isNotBlank() && getTeamId().isNotBlank()
+    override fun isConfigured(): Boolean =
+        super.isConfigured() && password.isNotBlank() && getTeamId().isNotBlank() && workspaceId.isNotBlank()
 
     private fun getTeamId() = username
 
@@ -87,7 +98,26 @@ class LinearRepository : NewBaseRepositoryImpl {
         runBlocking { remoteDataSource.setTaskState(task, state) }
     }
 
+    override fun getAttributes(): CredentialAttributes {
+        val serviceName = generateServiceName("Tasks", repositoryType.name + " " + getPresentableName())
+        return CredentialAttributes(serviceName, username)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as LinearRepository
+
+        return workspaceId == other.workspaceId
+    }
+
+    override fun hashCode(): Int {
+        return workspaceId.hashCode()
+    }
+
     companion object {
-        private const val URL = "https://api.linear.app/graphql"
+        private const val API_URL = "https://api.linear.app/graphql"
     }
 }
