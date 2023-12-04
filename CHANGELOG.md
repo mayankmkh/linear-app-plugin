@@ -4,13 +4,16 @@
 
 ## [Unreleased]
 
+## [2.0.0]
+
 ### Added
 
-- Allow multiple project server configuration by adding Workspace ID
+- **BREAKING**: Allow multiple project server configuration by adding Workspace ID. Need to reconfigure the task servers
 - Version Catalogs
 
 ### Changed
 
+- Minimum supported IDE version is 2022.3
 - Use Apollo's HttpInterceptor instead of okhttp for auth
 - Update dependabot check interval to monthly
 - GitHub Actions: Use Java 17
