@@ -4,15 +4,34 @@
 
 ## [Unreleased]
 
+### Added
+
+- Allow multiple project server configuration by adding Workspace ID
+- Version Catalogs
+
 ### Changed
 
+- Use Apollo's HttpInterceptor instead of okhttp for auth
+- Update dependabot check interval to monthly
 - GitHub Actions: Use Java 17
-- Upgrade Gradle Wrapper to `8.2.1`
+- Upgrade Gradle Wrapper to `8.5`
+- Dependencies - upgrade `org.jetbrains.intellij` to `1.16.1`
+- Dependencies - upgrade `org.jetbrains.changelog` to `2.2.0`
+- Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.23.4`
+- Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `12.0.2`
+- Dependencies - upgrade `apollo graphql` to `3.8.2`
+- Dependencies - upgrade `org.jetbrains.kotlin.jvm` to `1.9.21`
 - Dependencies (GitHub Actions) - upgrade `gradle/wrapper-validation-action` to `1.1.0`
-- Dependencies - upgrade `org.jetbrains.changelog` to `2.1.2`
-- Dependencies - upgrade `io.gitlab.arturbosch.detekt` to `1.23.1`
-- Dependencies - upgrade `org.jlleitschuh.gradle.ktlint` to `11.5.0`
-- Dependencies - upgrade `apollo graphql` to `3.8.1`
+- Dependencies (GitHub Actions) - upgrade `actions/create-pull-request` to `5`
+- Dependencies (GitHub Actions) - upgrade `actions/setup-java` to `3`
+- Dependencies (GitHub Actions) - upgrade `actions/download-artifact` to `3`
+- Dependencies (GitHub Actions) - upgrade `actions/checkout` to `4`
+- Dependencies (GitHub Actions) - upgrade `actions/cache` to `3.3.1`
+- Dependencies (GitHub Actions) - upgrade `actions/upload-artifact` to `3.1.2`
+
+### Fixed
+
+- EmptyCoroutineContext ClassCastException
 
 ## [1.1.0]
 
