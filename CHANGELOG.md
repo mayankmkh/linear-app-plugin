@@ -124,3 +124,12 @@
 ### Added
 
 - Initial implementation of Linear.app tasks server
+
+[Unreleased]: https://github.com/mayankmkh/linear-app-plugin/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.1.0...v2.0.0
+[1.1.0]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.0.0-beta01...v1.0.0
+[1.0.0-beta01]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.0.0-alpha03...v1.0.0-beta01
+[1.0.0-alpha03]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.0.0-alpha02...v1.0.0-alpha03
+[1.0.0-alpha02]: https://github.com/mayankmkh/linear-app-plugin/compare/v1.0.0-alpha01...v1.0.0-alpha02
+[1.0.0-alpha01]: https://github.com/mayankmkh/linear-app-plugin/commits/v1.0.0-alpha01
