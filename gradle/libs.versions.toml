@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.21"
+kotlin = "1.9.22"
 changelog = "2.2.0" # https://github.com/JetBrains/gradle-changelog-plugin
 gradleIntelliJPlugin = "1.16.1" # https://github.com/JetBrains/gradle-intellij-plugin
 detekt = "1.23.4" # https://detekt.github.io/detekt/gradle.html
