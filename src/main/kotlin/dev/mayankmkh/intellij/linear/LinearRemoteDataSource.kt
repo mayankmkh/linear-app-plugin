@@ -75,30 +75,39 @@ class LinearRemoteDataSource(private val apolloClient: ApolloClient) {
         createQuery: (offset: Int, endCursor: Optional<String>) -> Query<D>,
         getShortIssueConnection: (data: D) -> ShortIssueConnection,
     ) = withContext(Dispatchers.IO) {
-        var pageInfo = initialIssuePageInfo ?: PageInfoIssueConnection.PageInfo(hasNextPage = true, endCursor = null)
-        LOG.info("pageInfo: $pageInfo")
-
-        var remainingIssues = limit
-        val list: MutableList<ShortIssueConnection.Node> = ArrayList(limit)
-
-        while (remainingIssues > 0 && pageInfo.hasNextPage) {
-            LOG.info("remainingIssues: $remainingIssues")
-            val numberOfItems = remainingIssues.coerceAtMost(BATCH_SIZE)
-            val issuesQuery = createQuery(numberOfItems, Optional.presentIfNotNull(pageInfo.endCursor))
-            val response = apolloClient.query(issuesQuery).execute()
-
-            val data = response.data ?: break
-            val shortIssueConnection = getShortIssueConnection(data)
-            val nodes = shortIssueConnection.nodes
-
-            list.addAll(nodes)
-            pageInfo = shortIssueConnection.pageInfoIssueConnection.pageInfo
-            remainingIssues -= nodes.size
+        try {
+            var pageInfo = initialIssuePageInfo ?: PageInfoIssueConnection.PageInfo(
+                hasNextPage = true,
+                endCursor = null
+            )
             LOG.info("pageInfo: $pageInfo")
-        }
 
-        LOG.info("list: " + list.joinToString { it.identifier })
-        list
+            var remainingIssues = limit
+            val list: MutableList<ShortIssueConnection.Node> = ArrayList(limit)
+
+            while (remainingIssues > 0 && pageInfo.hasNextPage) {
+                LOG.info("remainingIssues: $remainingIssues")
+                val numberOfItems = remainingIssues.coerceAtMost(BATCH_SIZE)
+                val issuesQuery =
+                    createQuery(numberOfItems, Optional.presentIfNotNull(pageInfo.endCursor))
+                val response = apolloClient.query(issuesQuery).execute()
+
+                val data = response.data ?: break
+                val shortIssueConnection = getShortIssueConnection(data)
+                val nodes = shortIssueConnection.nodes
+
+                list.addAll(nodes)
+                pageInfo = shortIssueConnection.pageInfoIssueConnection.pageInfo
+                remainingIssues -= nodes.size
+                LOG.info("pageInfo: $pageInfo")
+            }
+
+            LOG.info("list: " + list.joinToString { it.identifier })
+            list
+        } catch (e: Exception) {
+            LOG.severe("" + e)
+            throw e
+        }
     }
 
     private suspend fun getIssuesPageInfo(

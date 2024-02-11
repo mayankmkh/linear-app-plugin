@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [2.0.1]
+
+### Fixed
+
+- To fix [GitHub issue 205](https://github.com/mayankmkh/linear-app-plugin/issues/205) due to updated Linear API.
+
 ## [2.0.0]
 
 ### Added
